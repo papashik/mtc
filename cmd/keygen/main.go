@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/cloudflare/circl/sign/mldsa/mldsa65"
@@ -64,6 +65,11 @@ func generate(logger *zap.Logger, algo, out string) error {
 	}
 	privB, err := priv.MarshalBinary()
 	if err != nil {
+		return err
+	}
+
+	dir, _ := filepath.Split(out)
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
 

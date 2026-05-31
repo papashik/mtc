@@ -133,8 +133,6 @@ func (l *Log) AddLandmark() (cert.Checkpoint, error) {
 }
 
 func (l *Log) GetEntry(index uint64) ([]byte, error) {
-	l.mu.RLock()
-	defer l.mu.RUnlock()
 	return l.storage.GetEntry(index)
 }
 

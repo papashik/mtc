@@ -205,20 +205,21 @@ func runServer(cfg *Config, l *log.Log) error {
 		}
 	})
 
-	mux.HandleFunc("GET /landmark/{n}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /entry/{n}", func(w http.ResponseWriter, r *http.Request) {
 		nStr := r.PathValue("n")
-		n, err := strconv.Atoi(nStr)
+		n, err := strconv.ParseUint(nStr, 10, 64)
 		if err != nil || n < 0 {
-			http.Error(w, "bad landmark number", http.StatusBadRequest)
+			http.Error(w, "bad entry number", http.StatusBadRequest)
 			return
 		}
-		ls := l.ActiveLandmarks()
-		if n >= len(ls) {
-			http.Error(w, "n exceeds max landmark index", http.StatusBadRequest)
+		entry, err := l.GetEntry(n)
+		if err != nil {
+			logger.Error("getting entry", zap.Error(err))
+			http.Error(w, "getting entry: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(ls[n]); err != nil {
+		if err := json.NewEncoder(w).Encode(entry); err != nil {
 			logger.Error("writing response", zap.Error(err))
 		}
 	})
