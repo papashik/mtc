@@ -22,11 +22,18 @@ type VerifyContext struct {
 	Landmarks map[string][]Checkpoint
 }
 
-func VerifyCertificate(certDER []byte, ctx VerifyContext) error {
+const (
+	ModeAnyProof = iota
+	ModeSignatureOnly
+	ModeLandmarkOnly
+)
+
+func VerifyCertificate(certDER []byte, ctx VerifyContext, mode int) error {
 	c, err := x509.ParseCertificate(certDER)
 	if err != nil {
 		return err
 	}
+	caID := c.Issuer.Names[0].Value.(string)
 
 	proof, err := DeserializeMTCProof(c.Signature)
 	if err != nil {
@@ -60,7 +67,10 @@ func VerifyCertificate(certDER []byte, ctx VerifyContext) error {
 		return fmt.Errorf("evaluate inclusion proof: %w", err)
 	}
 
-	caID := c.Issuer.Names[0].Value.(string)
+	if mode == ModeSignatureOnly {
+		return verifySignatures(caID, proof, expectedHash, ctx)
+	}
+
 	for _, ts := range ctx.Landmarks[caID] {
 		if proof.Start == 0 && proof.End == ts.End {
 			if string(ts.RootHash) == string(expectedHash) {
@@ -68,6 +78,10 @@ func VerifyCertificate(certDER []byte, ctx VerifyContext) error {
 			}
 			return fmt.Errorf("subtree hash mismatch with trusted subtree [%d %d)", proof.Start, proof.End)
 		}
+	}
+
+	if mode == ModeLandmarkOnly {
+		return fmt.Errorf("no landmark found [%d %d)", proof.Start, proof.End)
 	}
 
 	return verifySignatures(caID, proof, expectedHash, ctx)

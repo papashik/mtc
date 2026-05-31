@@ -40,7 +40,8 @@ func main() {
 }
 
 func validateCmd() *cobra.Command {
-	return &cobra.Command{
+	var mode int
+	cmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Validate MTC certificate from stdin",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -50,9 +51,11 @@ func validateCmd() *cobra.Command {
 				return fmt.Errorf("no PEM block")
 			}
 
-			return cert.VerifyCertificate(block.Bytes, mtc.MustLoadVerifyContext(cfgPath))
+			return cert.VerifyCertificate(block.Bytes, mtc.MustLoadVerifyContext(cfgPath), mode)
 		},
 	}
+	cmd.Flags().IntVar(&mode, "mode", 0, "mode to verify certificate: 0 - check any, 1 - signature only, 2 - landmark only")
+	return cmd
 }
 
 func updateCmd() *cobra.Command {
@@ -62,7 +65,7 @@ func updateCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := mtc.MustLoadConfig(cfgPath)
 			for _, ca := range cfg.CAServers {
-				req, err := http.NewRequest(http.MethodGet, ca.URL, nil)
+				req, err := http.NewRequest(http.MethodGet, ca.URL+"/landmarks", nil)
 				if err != nil {
 					return err
 				}

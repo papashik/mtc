@@ -1,8 +1,8 @@
+data_dir: ./data/client
 ca_servers:
   - id: "32473.1"
     url: "http://localhost:8080"
     public_key: "./keys/ca1.pub"
-    landmark_dir: "./data/client/landmarks/32473.1"
 cosigners:
   - id: "32473.1.1"
     public_key: "./keys/cosigner1-1.pub"

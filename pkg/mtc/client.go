@@ -47,7 +47,7 @@ func VerifyPeerCertificateFunc(ctx cert.VerifyContext) func(rawCerts [][]byte, v
 		if len(rawCerts) == 0 {
 			return fmt.Errorf("no certificates provided")
 		}
-		return cert.VerifyCertificate(rawCerts[0], ctx)
+		return cert.VerifyCertificate(rawCerts[0], ctx, cert.ModeAnyProof)
 	}
 }
 

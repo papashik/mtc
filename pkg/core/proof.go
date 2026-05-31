@@ -116,28 +116,6 @@ func EvaluateInclusionProof(
 	return r, nil
 }
 
-func VerifyInclusionProof(
-	start, end, index uint64,
-	proof [][]byte,
-	entryHash []byte,
-	subtreeHash []byte,
-) error {
-	if subtreeHash == nil {
-		return errors.New("subtreeHash is nil")
-	}
-
-	expectedSubtreeHash, err := EvaluateInclusionProof(start, end, index, proof, entryHash)
-	if err != nil {
-		return err
-	}
-
-	if !bytes.Equal(expectedSubtreeHash, subtreeHash) {
-		return fmt.Errorf("inclusion proof subtree hash does not match")
-	}
-
-	return nil
-}
-
 func GenerateConsistencyProof(
 	start, end, treeSize uint64,
 	getNodeHash func(s, e uint64) ([]byte, error),
