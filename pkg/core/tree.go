@@ -56,6 +56,7 @@ func (t *MerkleTree) TreeSize() uint64 {
 func (t *MerkleTree) Peaks() [][]byte {
 	cp := make([][]byte, len(t.peaks))
 	for i, p := range t.peaks {
+		cp[i] = make([]byte, len(p))
 		copy(cp[i], p)
 	}
 	return cp
