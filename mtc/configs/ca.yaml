@@ -1,0 +1,14 @@
+ca_id: "32473.1"
+data_dir: "./data"
+signing_key: "./keys/ca1.priv"
+cosigners:
+  - id: "32473.1.1"
+    url: "http://localhost:8081"
+    public_key: "./keys/cosigner1-1.pub"
+  # - id: "32473.1.2"
+  #   url: "http://localhost:8082"
+  #   public_key: "./keys/cosigner1-2.pub"
+server_addr: ":8080"
+checkpoint_interval: "5s"
+cert_validity: "168h"
+max_active_landmarks: 1000
