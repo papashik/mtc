@@ -45,7 +45,7 @@ func main() {
 			return runCosigner(cfg)
 		},
 	}
-	root.Flags().StringVar(&cfgPath, "config", "cosigner.yaml", "Config file path")
+	root.Flags().StringVar(&cfgPath, "config", "configs/cosigner.yaml", "Config file path")
 
 	if err := root.Execute(); err != nil {
 		logger.Fatal("execute", zap.Error(err))

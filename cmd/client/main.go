@@ -32,7 +32,7 @@ func main() {
 	defer func() { _ = logger.Sync() }()
 
 	root := &cobra.Command{Use: "client"}
-	root.PersistentFlags().StringVar(&cfgPath, "config", "client.yaml", "Config file path")
+	root.PersistentFlags().StringVar(&cfgPath, "config", "configs/client.yaml", "Config file path")
 	root.AddCommand(validateCmd(), updateCmd(), connectCmd(), serveCmd(), requestCmd(), shortifyCmd())
 	if err := root.Execute(); err != nil {
 		os.Exit(1)

@@ -36,7 +36,7 @@ func main() {
 	defer func() { _ = logger.Sync() }()
 
 	root := &cobra.Command{Use: "ca"}
-	root.PersistentFlags().StringVar(&cfgPath, "config", "ca.yaml", "Config file path")
+	root.PersistentFlags().StringVar(&cfgPath, "config", "configs/ca.yaml", "Config file path")
 	root.AddCommand(serveCmd())
 	_ = root.ParseFlags(os.Args[1:])
 
