@@ -33,7 +33,7 @@ func main() {
 
 	root := &cobra.Command{Use: "client"}
 	root.PersistentFlags().StringVar(&cfgPath, "config", "client.yaml", "Config file path")
-	root.AddCommand(validateCmd(), updateCmd(), connectCmd(), serveCmd(), requestCmd())
+	root.AddCommand(validateCmd(), updateCmd(), connectCmd(), serveCmd(), requestCmd(), shortifyCmd())
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -239,6 +239,23 @@ func requestCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVar(&caURL, "url", "", "CA server URL")
 	cmd.Flags().StringVar(&pubKeyPath, "pub", "", "public key path")
+	return cmd
+}
+
+func shortifyCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "shortify",
+		Short: "Remove MTC signatures from certificate",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			certPEM := mustReadAll(os.Stdin)
+			certDER, _ := pem.Decode(certPEM)
+			newBytes, err := mtc.ShortifyCertificate(certDER.Bytes)
+			if err != nil {
+				return err
+			}
+			return pem.Encode(os.Stdout, &pem.Block{Type: "CERTIFICATE", Bytes: newBytes})
+		},
+	}
 	return cmd
 }
 

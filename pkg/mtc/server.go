@@ -70,3 +70,21 @@ func GetCertificateFunc(certDER []byte, privateKey []byte, mode int) func(client
 		return full()
 	}
 }
+
+// ShortifyCertificate removes all MTC signatures from a certificate if any.
+func ShortifyCertificate(certDER []byte) ([]byte, error) {
+	c, err := x509.ParseCertificate(certDER)
+	if err != nil {
+		return nil, err
+	}
+	proof, err := cert.DeserializeMTCProof(c.Signature)
+	if err != nil {
+		return nil, fmt.Errorf("parse mtc proof: %w", err)
+	}
+	newSigBytes := cert.SerializeMTCProof(&cert.MTCProof{Start: proof.Start, End: proof.End, InclusionProof: proof.InclusionProof})
+	newBytes, err := asn1.Marshal(cert.NewMTCCertificate(c.RawTBSCertificate, newSigBytes))
+	if err != nil {
+		return nil, err
+	}
+	return newBytes, nil
+}
