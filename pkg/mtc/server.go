@@ -1,6 +1,7 @@
 package mtc
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
@@ -24,9 +25,16 @@ func GetCertificateFunc(certDER []byte, privateKey []byte, mode int) func(client
 		if err != nil {
 			return nil, err
 		}
-		key := new(mldsa44.PrivateKey)
-		if err := key.UnmarshalBinary(privateKey); err != nil {
-			return nil, err
+		var key crypto.Signer
+		var ml *mldsa44.PrivateKey
+		if err := ml.UnmarshalBinary(privateKey); err != nil {
+			pub, err := x509.ParsePKCS8PrivateKey(privateKey)
+			if err != nil {
+				return nil, fmt.Errorf("parse private key: %w", err)
+			}
+			key = pub.(crypto.Signer)
+		} else {
+			key = ml
 		}
 		proof, err := cert.DeserializeMTCProof(c.Signature)
 		if err != nil {

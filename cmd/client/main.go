@@ -24,7 +24,7 @@ var (
 
 func main() {
 	var err error
-	logger, err = zap.NewDevelopment()
+	logger, err = zap.NewProduction()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -51,7 +51,10 @@ func validateCmd() *cobra.Command {
 				return fmt.Errorf("no PEM block")
 			}
 
-			return cert.VerifyCertificate(block.Bytes, mtc.MustLoadVerifyContext(cfgPath), mode)
+			if err := cert.VerifyCertificate(block.Bytes, mtc.MustLoadVerifyContext(cfgPath), mode); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			}
+			return nil
 		},
 	}
 	cmd.Flags().IntVar(&mode, "mode", 0, "mode to verify certificate: 0 - check any, 1 - signature only, 2 - landmark only")
@@ -120,8 +123,8 @@ func connectCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("TLS handshake failed: %w", err)
 			}
-
-			logger.Info("got response", zap.Binary("response", mustReadAll(conn)))
+			fmt.Println("Certificate length:", len(conn.ConnectionState().PeerCertificates[0].Raw))
+			fmt.Println(string(mustReadAll(conn)))
 			return nil
 		},
 	}
@@ -146,8 +149,10 @@ func serveCmd() *cobra.Command {
 			}
 			certPEM := mustReadFile(certPath)
 			certDER, _ := pem.Decode(certPEM)
+			keyPEM := mustReadFile(privKeyPath)
+			keyDER, _ := pem.Decode(keyPEM)
 			config := &tls.Config{
-				GetCertificate: mtc.GetCertificateFunc(certDER.Bytes, mustReadFile(privKeyPath), mode),
+				GetCertificate: mtc.GetCertificateFunc(certDER.Bytes, keyDER.Bytes, mode),
 			}
 			ln, err := tls.Listen("tcp", ":"+port, config)
 			if err != nil {
@@ -166,6 +171,7 @@ func serveCmd() *cobra.Command {
 					if err != nil {
 						logger.Error("writing response", zap.Error(err))
 					}
+					c.Close()
 				}(conn)
 			}
 		},
@@ -225,7 +231,7 @@ func requestCmd() *cobra.Command {
 
 			resp, err := http.Post(caURL+"/issue", "application/x-pem-file", bytes.NewReader(csrPEM))
 			if err != nil {
-				return fmt.Errorf("request cert: %w", err)
+				logger.Fatal("request cert", zap.Error(err))
 			}
 			defer func() { _ = resp.Body.Close() }()
 
