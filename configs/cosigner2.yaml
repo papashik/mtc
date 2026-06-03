@@ -1,7 +1,7 @@
 cosigner_id: "32473.1.2"
-signing_key: "./keys/cosigner1-2.priv"
+signing_key: "./keys/cosigner2.priv"
 ca_id: "32473.1"
 ca_public_key: "./keys/ca1.pub"
 server_addr: ":8082"
-data_dir: "./data/cosigner1-2"
+data_dir: "./data/cosigner2"
 
