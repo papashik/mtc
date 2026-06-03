@@ -39,15 +39,15 @@ func ParseProto(ca pkix.Name, protos []string) []cert.Checkpoint {
 			for i := 2; i < len(parts); i++ {
 				rng := strings.Split(parts[i], LandmarkRangeSep)
 				if len(rng) != 2 {
-					return nil
+					return result
 				}
 				start, err := strconv.ParseUint(rng[0], 10, 64)
 				if err != nil {
-					return nil
+					return result
 				}
 				end, err := strconv.ParseUint(rng[1], 10, 64)
 				if err != nil {
-					return nil
+					return result
 				}
 				result = append(result, cert.Checkpoint{Start: start, End: end})
 			}

@@ -41,7 +41,7 @@ func GetCertificateFunc(certDER []byte, privateKey []byte, mode int) func(client
 			return nil, fmt.Errorf("parse mtc proof: %w", err)
 		}
 
-		tmpKey, _ := rsa.GenerateKey(rand.Reader, 2048) // without it we have server-side problems, with it we have client-side problems :(
+		tmpKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 		full := func() (*tls.Certificate, error) {
 			return &tls.Certificate{
 				Certificate: [][]byte{certDER},
